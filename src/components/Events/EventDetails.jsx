@@ -11,7 +11,6 @@ export default function EventDetails() {
     queryKey: ['event', { id: id }],
     queryFn: ({ signal }) => fetchEvent({ id, signal }),
   });
-  console.log(data);
 
   return (
     <>
@@ -25,20 +24,20 @@ export default function EventDetails() {
       {isError && <ErrorBlock title="Event not found!" message={error?.info?.message || 'Something went wrong!'} />}
       {data && <article id="event-details">
         <header>
-          <h1>{data}</h1>
+          <h1>{data.title}</h1>
           <nav>
             <button>Delete</button>
-            <Link to="edit">Edit</Link>
+            <Link to={`/events/${data.id}/edit`}>Edit</Link>
           </nav>
         </header>
         <div id="event-details-content">
-          <img src="" alt="" />
+          <img src={`http://localhost:3000/${data.image}`} alt={data.title} />
           <div id="event-details-info">
             <div>
-              <p id="event-details-location">{data}</p>
-              <time dateTime={`Todo-DateT$Todo-Time`}>DATE @ TIME</time>
+              <p id="event-details-location">{data.location}</p>
+              <time dateTime={`Todo-DateT$Todo-Time`}>{data.date} @ {data.time}</time>
             </div>
-            <p id="event-details-description">EVENT DESCRIPTION</p>
+            <p id="event-details-description">{data.description}</p>
           </div>
         </div>
       </article>}
