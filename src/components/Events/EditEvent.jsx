@@ -1,4 +1,4 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import Modal from '../UI/Modal.jsx';
 import EventForm from './EventForm.jsx';
@@ -51,7 +51,7 @@ export default function EditEvent() {
       queryKey: ['event', { id }],
       queryFn: ({ signal }) => fetchEvent({ id, signal }),
     });
-
+  // useLoaderData();
   function handleSubmit(formData) {
     formData.id = id
     console.log(formData);
@@ -64,7 +64,7 @@ export default function EditEvent() {
 
   return (
     <Modal onClose={handleClose}>
-      {isEventLoading && <p>Loading...</p>}
+      {/* {isEventLoading && <p>Loading...</p>} */}
       {(isEventError || isMutationError) && (
         <ErrorBlock
           title="Error Occurred!"
@@ -83,4 +83,13 @@ export default function EditEvent() {
       )}
     </Modal>
   );
+}
+
+
+
+export function loader({ params }) {
+  return queryClient.fetchQuery({
+    queryKey: ['event', { id: params.id }],
+    queryFn: ({ signal }) => fetchEvent({ id: params.id, signal }),
+  })
 }
