@@ -24,10 +24,30 @@ export async function fetchEvents({ signal, searchTerm }) {
  return events;
 }
 
-export async function createNewEvent(eventData) {
- const response = await fetch(`http://localhost:3000/events`, {
-  method: "POST",
-  body: JSON.stringify(eventData),
+export async function createNewEvent(input, method) {
+ const payload =
+  typeof input === "object" && input !== null && "event" in input
+   ? input
+   : { event: input, method: method ?? "POST" };
+
+ const { event, method: requestMethod = "POST" } = payload;
+
+ console.log({ event, requestMethod });
+
+ let url = "http://localhost:3000/events";
+ if (requestMethod === "PUT") {
+  url = `http://localhost:3000/events/${event.id}`;
+ }
+ if (requestMethod === "PUT" && !event?.id) {
+  const error = new Error("Please send event id");
+  error.code = 400;
+  error.info = { message: "Event ID is missing" };
+  throw error;
+ }
+
+ const response = await fetch(url, {
+  method: requestMethod,
+  body: JSON.stringify({ event }),
   headers: {
    "Content-Type": "application/json",
   },
@@ -40,9 +60,9 @@ export async function createNewEvent(eventData) {
   throw error;
  }
 
- const { event } = await response.json();
+ const { event: createdEvent } = await response.json();
 
- return event;
+ return createdEvent;
 }
 
 export async function fetchSelectableImages({ signal }) {

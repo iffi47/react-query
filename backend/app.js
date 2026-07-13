@@ -18,6 +18,11 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'X-Requested-With,content-type'
   );
+
+  if (req.method === "OPTIONS") {
+   return res.sendStatus(200);
+  }
+
   next();
 });
 
@@ -75,38 +80,38 @@ app.get('/events/:id', async (req, res) => {
 });
 
 app.post('/events', async (req, res) => {
-  const { event } = req.body;
+ const { event } = req.body;
 
-  if (!event) {
-    return res.status(400).json({ message: 'Event is required' });
-  }
+ if (!event) {
+  return res.status(400).json({ message: "Event is required" });
+ }
 
-  console.log(event);
+ // console.log(event);
 
-  if (
-    !event.title?.trim() ||
-    !event.description?.trim() ||
-    !event.date?.trim() ||
-    !event.time?.trim() ||
-    !event.image?.trim() ||
-    !event.location?.trim()
-  ) {
-    return res.status(400).json({ message: 'Invalid data provided.' });
-  }
+ if (
+  !event.title?.trim() ||
+  !event.description?.trim() ||
+  !event.date?.trim() ||
+  !event.time?.trim() ||
+  !event.image?.trim() ||
+  !event.location?.trim()
+ ) {
+  return res.status(400).json({ message: "Invalid data provided." });
+ }
 
-  const eventsFileContent = await fs.readFile('./data/events.json');
-  const events = JSON.parse(eventsFileContent);
+ const eventsFileContent = await fs.readFile("./data/events.json");
+ const events = JSON.parse(eventsFileContent);
 
-  const newEvent = {
-    id: Math.round(Math.random() * 10000).toString(),
-    ...event,
-  };
+ const newEvent = {
+  id: Math.round(Math.random() * 10000).toString(),
+  ...event,
+ };
 
-  events.push(newEvent);
+ events.push(newEvent);
 
-  await fs.writeFile('./data/events.json', JSON.stringify(events));
+ await fs.writeFile("./data/events.json", JSON.stringify(events));
 
-  res.json({ event: newEvent });
+ res.json({ event: newEvent });
 });
 
 app.put('/events/:id', async (req, res) => {
