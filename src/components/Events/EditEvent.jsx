@@ -14,12 +14,35 @@ export default function EditEvent() {
       mutationFn: createNewEvent,
       onMutate: async (data) => {
         const newEvent = data.event;
-        await queryClient.cancelQueries({ queryKey: ['event', 'events', { id }] })
-        queryClient.setQueryData(['event', 'events', { id }], newEvent)
+        await queryClient.cancelQueries({ queryKey: ['event'] });
+        await queryClient.cancelQueries({ queryKey: ['events'] });
+
+        const previousEvent = queryClient.getQueryData(['event', { id }]);
+        const previousEvents = queryClient.getQueryData(['events']);
+
+        queryClient.setQueryData(['event', { id }], newEvent);
+        queryClient.setQueryData(['events'], (oldEvents = []) =>
+          oldEvents.map((event) => (event.id === newEvent.id ? newEvent : event))
+        );
+
+        return { previousEvent, previousEvents };
       },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['events', 'event'], });
-        navigate('/events');
+      onSuccess: (updatedEvent) => {
+        queryClient.setQueryData(['event', { id }], updatedEvent);
+        queryClient.setQueryData(['events'], (oldEvents = []) =>
+          oldEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+        );
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        queryClient.invalidateQueries({ queryKey: ['event'] });
+        handleClose();
+      },
+      onError: (_error, _data, context) => {
+        if (context?.previousEvent) {
+          queryClient.setQueryData(['event', { id }], context.previousEvent);
+        }
+        if (context?.previousEvents) {
+          queryClient.setQueryData(['events'], context.previousEvents);
+        }
       },
     });
 
